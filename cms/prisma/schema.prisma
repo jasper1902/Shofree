@@ -1,0 +1,62 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator markdown {
+  provider = "prisma-markdown"
+  output   = "./ERD.md"
+  title    = "Entity-Relationship Diagram"
+}
+
+model User {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  email       String        @unique
+  username    String        @unique
+  password    String
+  balance     Float         @default(0.0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  Transaction Transaction[]
+  Order       Order[]
+}
+
+model Transaction {
+  id        String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String          @db.ObjectId
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount    Float
+  type      TransactionType
+  createdAt DateTime        @default(now())
+  Order     Order[]
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAW
+  PURCHASE
+}
+
+model Order {
+  id            String            @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String            @db.ObjectId
+  amount        Float
+  createDate    DateTime          @default(now())
+  products      CartProductType[]
+  transactionId String            @db.ObjectId
+  transaction   Transaction       @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+type CartProductType {
+  name        String
+  description String
+  category    String
+  brand       String
+  quantity    Int
+  price       Float
+}
