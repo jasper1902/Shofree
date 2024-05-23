@@ -93,7 +93,6 @@ export class TransactionService {
           .send({ cmd: 'transaction-purchase' }, { products, userId })
           .pipe(timeout(5000)),
       );
-
       if (result.statusCode !== 201) {
         throw new BadRequestException(result.message);
       }
